@@ -15,7 +15,7 @@ func mainLoop() {
 	// This will continuously set the temperature label every second with updated offset information
 	go func() {
 		for {
-			temperatureLabel.Label = fmt.Sprintf("Water tank temperature is %.2f (%d seconds ago)", tankTemp, calculateSuccessfulPollOffset())
+			temperatureLabel.Label = fmt.Sprintf("Water tank temperature is %.2f \u00B0C (%d seconds ago)", tankTemp, calculateSuccessfulPollOffset())
 			temperatureMenu.Refresh()
 
 			time.Sleep(time.Second)
@@ -58,6 +58,10 @@ func mainLoop() {
 				userNotifiedOnce = true
 			} else if tankTemp < 45 {
 				userNotifiedOnce = false // so we can send another notification when it exceeds 45 eventually
+			}
+
+			if debug {
+				water.Notify(60, fyneApp)
 			}
 		}
 
