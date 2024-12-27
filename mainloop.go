@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2"
 	"time"
+	"watertemp/water"
 )
 
 func mainLoop() {
 	var hasFailed = false
+	var userNotifiedOnce = false
 	var tankTemp float64 = 0
 
 	// This will continuously set the temperature label every second with updated offset information
@@ -22,7 +24,7 @@ func mainLoop() {
 
 	// Code for fetching the temperature and handling failure
 	for {
-		var temp, err = getWaterTemp()
+		var temp, err = water.GetWaterTemp(localIp)
 		if err != nil && !hasFailed {
 			var recentFailLabel = fyne.NewMenuItem("Failed to poll water tank temperature. Last know value shown", nil)
 			recentFailLabel.Disabled = true
@@ -49,6 +51,14 @@ func mainLoop() {
 				temperatureLabel,
 			}
 			temperatureMenu.Refresh()
+
+			// Notification
+			if !userNotifiedOnce {
+				water.Notify(tankTemp, fyneApp)
+				userNotifiedOnce = true
+			} else if tankTemp < 45 {
+				userNotifiedOnce = false // so we can send another notification when it exceeds 45 eventually
+			}
 		}
 
 		if debug {

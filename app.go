@@ -16,8 +16,11 @@ const localIp = "10.50.0.116"
 //go:embed resources/thermometer.png
 var iconBytes []byte
 
+// The last unix time the tank temperature was polled
 var successfulPollTimestamp int64 = 0
 
+// Fyne global variables
+var fyneApp = app.New()
 var temperatureLabel = fyne.NewMenuItem("Placeholder (Wait)", nil)
 var temperatureMenu = fyne.NewMenu("Temperature App", temperatureLabel)
 
@@ -25,7 +28,6 @@ func main() {
 	temperatureLabel.Disabled = true
 
 	var (
-		fyneApp     = app.New()
 		trayControl desktop.App
 		isDesktop   bool
 	)

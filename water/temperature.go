@@ -1,4 +1,4 @@
-package main
+package water
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func getWaterTemp() (float64, error) {
+func GetWaterTemp(localIp string) (float64, error) {
 	var request, httpErr = http.Get(fmt.Sprintf("http://%s/homekit/temperature", localIp))
 	if httpErr != nil {
 		return 0, httpErr
