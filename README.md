@@ -5,6 +5,7 @@
 - Just use ```go build```
 
 # Requirements
+- Go tooling
 - A C Compiler (Gcc, Clang), for Fyne
 - System graphics driver
 
