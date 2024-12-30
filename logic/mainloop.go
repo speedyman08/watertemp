@@ -1,8 +1,9 @@
-package main
+package logic
 
 import (
 	"fyne.io/fyne/v2"
 	"time"
+	"watertemp/config"
 	"watertemp/water"
 )
 
@@ -23,7 +24,7 @@ func (app *App) MainLoop() {
 
 	// Code for fetching the temperature and handling failure
 	for {
-		var temp, err = water.GetWaterTemp(globals.resourceIp)
+		var temp, err = water.GetWaterTemp(config.ResourceIP)
 		if err != nil && !hasFailed {
 			var recentFailLabel = fyne.NewMenuItem("Failed to poll water tank temperature. Last know value shown", nil)
 			recentFailLabel.Disabled = true
@@ -59,12 +60,12 @@ func (app *App) MainLoop() {
 				userNotifiedOnce = false // so we can send another notification when it exceeds 45 eventually
 			}
 
-			if globals.debug {
+			if config.Debug {
 				water.Notify(60, app.fyneApp)
 			}
 		}
 
-		if globals.debug {
+		if config.Debug {
 			time.Sleep(time.Second * 10)
 		} else {
 			time.Sleep(time.Minute)

@@ -1,26 +1,13 @@
-package main
+package logic
 
 import (
-	_ "embed"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/driver/desktop"
 	"log"
+	"watertemp/resources"
 	"watertemp/water"
 )
-
-// thermometer icon for the system tray
-//
-//go:embed resources/thermometer.png
-var iconBytes []byte
-
-var globals = Globals{}
-
-type Globals struct {
-	debug      bool
-	resourceIp string
-	iconBytes  []byte
-}
 
 type App struct {
 	fyneApp          fyne.App
@@ -42,14 +29,14 @@ func NewApp() (a *App) {
 	return
 }
 
-func (app *App) setTray() {
+func (app *App) configureTray() {
 	var (
 		trayControl desktop.App
 		isDesktop   bool
 	)
 
 	// Setting icon
-	var rss = fyne.NewStaticResource("thermometer.png", iconBytes)
+	var rss = fyne.NewStaticResource("thermometer.png", resources.AppIconBytes)
 
 	app.fyneApp.SetIcon(rss)
 
@@ -62,16 +49,7 @@ func (app *App) setTray() {
 }
 
 func (app *App) Run() {
-	app.setTray()
+	app.configureTray()
 	go app.MainLoop()
 	app.fyneApp.Run()
-}
-
-func main() {
-	globals.debug = false
-	globals.resourceIp = "10.50.0.116"
-	globals.iconBytes = iconBytes
-
-	var a = NewApp()
-	a.Run()
 }
