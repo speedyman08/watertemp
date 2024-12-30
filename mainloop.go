@@ -1,22 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"fyne.io/fyne/v2"
 	"time"
 	"watertemp/water"
 )
 
-func mainLoop() {
+func (app *App) MainLoop() {
 	var hasFailed = false
 	var userNotifiedOnce = false
-	var tankTemp float64 = 0
 
 	// This will continuously set the temperature label every second with updated offset information
 	go func() {
 		for {
-			temperatureLabel.Label = fmt.Sprintf("Water tank temperature is %.2f \u00B0C (%d seconds ago)", tankTemp, calculateSuccessfulPollOffset())
-			temperatureMenu.Refresh()
+			app.tankStatus.LastSuccessfulPollSeconds = app.calculateSuccessfulPollOffset()
+			app.temperatureLabel.Label = app.tankStatus.String()
+			app.trayMenu.Refresh()
 
 			time.Sleep(time.Second)
 		}
@@ -24,48 +23,48 @@ func mainLoop() {
 
 	// Code for fetching the temperature and handling failure
 	for {
-		var temp, err = water.GetWaterTemp(localIp)
+		var temp, err = water.GetWaterTemp(globals.resourceIp)
 		if err != nil && !hasFailed {
 			var recentFailLabel = fyne.NewMenuItem("Failed to poll water tank temperature. Last know value shown", nil)
 			recentFailLabel.Disabled = true
 
 			// This is a quirk with Fyne. I cannot append() this failure label to the system tray as that creates another extra "Quit" button
 			var itemReconstruction = []*fyne.MenuItem{
-				temperatureLabel,
+				app.temperatureLabel,
 				recentFailLabel,
 			}
-			temperatureMenu.Items = itemReconstruction
+			app.trayMenu.Items = itemReconstruction
 
-			temperatureMenu.Refresh()
+			app.trayMenu.Refresh()
 
 			hasFailed = true
 		}
 
 		// When temperature is polled correctly
 		if err == nil {
-			tankTemp = temp
+			app.tankStatus.Temperature = temp
 			hasFailed = false
-			successfulPollTimestamp = time.Now().Unix()
+			app.successfulPollTimestamp = time.Now().Unix()
 
-			temperatureMenu.Items = []*fyne.MenuItem{
-				temperatureLabel,
+			app.trayMenu.Items = []*fyne.MenuItem{
+				app.temperatureLabel,
 			}
-			temperatureMenu.Refresh()
+			app.trayMenu.Refresh()
 
 			// Notification
 			if !userNotifiedOnce {
-				water.Notify(tankTemp, fyneApp)
+				water.Notify(app.tankStatus.Temperature, app.fyneApp)
 				userNotifiedOnce = true
-			} else if tankTemp < 45 {
+			} else if app.tankStatus.Temperature < 45 {
 				userNotifiedOnce = false // so we can send another notification when it exceeds 45 eventually
 			}
 
-			if debug {
-				water.Notify(60, fyneApp)
+			if globals.debug {
+				water.Notify(60, app.fyneApp)
 			}
 		}
 
-		if debug {
+		if globals.debug {
 			time.Sleep(time.Second * 10)
 		} else {
 			time.Sleep(time.Minute)
@@ -73,12 +72,12 @@ func mainLoop() {
 	}
 }
 
-func calculateSuccessfulPollOffset() int64 {
+func (app *App) calculateSuccessfulPollOffset() int64 {
 	var nowTime = time.Now().Unix()
 
-	if successfulPollTimestamp == 0 {
+	if app.successfulPollTimestamp == 0 {
 		return 0
 	} else {
-		return nowTime - successfulPollTimestamp
+		return nowTime - app.successfulPollTimestamp
 	}
 }

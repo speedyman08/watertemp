@@ -6,27 +6,43 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/driver/desktop"
 	"log"
+	"watertemp/water"
 )
-
-const debug = false
-const localIp = "10.50.0.116"
 
 // thermometer icon for the system tray
 //
 //go:embed resources/thermometer.png
 var iconBytes []byte
 
-// The last unix time the tank temperature was polled
-var successfulPollTimestamp int64 = 0
+var globals = Globals{}
 
-// Fyne global variables
-var fyneApp = app.New()
-var temperatureLabel = fyne.NewMenuItem("Placeholder (Wait)", nil)
-var temperatureMenu = fyne.NewMenu("Temperature App", temperatureLabel)
+type Globals struct {
+	debug      bool
+	resourceIp string
+	iconBytes  []byte
+}
 
-func main() {
-	temperatureLabel.Disabled = true
+type App struct {
+	fyneApp          fyne.App
+	trayMenu         *fyne.Menu
+	temperatureLabel *fyne.MenuItem
+	// The last unix time the tank temperature was polled
+	successfulPollTimestamp int64
+	tankStatus              water.Status
+}
 
+func NewApp() (a *App) {
+	a = new(App)
+	a.fyneApp = app.New()
+	a.temperatureLabel = fyne.NewMenuItem("Placeholder (Wait)", nil)
+	a.trayMenu = fyne.NewMenu("Temperature App", a.temperatureLabel)
+
+	a.temperatureLabel.Disabled = true
+
+	return
+}
+
+func (app *App) setTray() {
 	var (
 		trayControl desktop.App
 		isDesktop   bool
@@ -35,16 +51,27 @@ func main() {
 	// Setting icon
 	var rss = fyne.NewStaticResource("thermometer.png", iconBytes)
 
-	fyneApp.SetIcon(rss)
+	app.fyneApp.SetIcon(rss)
 
 	// Type assertion https://go.dev/tour/methods/15
-	if trayControl, isDesktop = fyneApp.(desktop.App); !isDesktop {
+	if trayControl, isDesktop = app.fyneApp.(desktop.App); !isDesktop {
 		log.Fatal("The environment in which this app is running isn't a desktop. This is a desktop application as it requires the system tray")
 	}
 
-	trayControl.SetSystemTrayMenu(temperatureMenu)
+	trayControl.SetSystemTrayMenu(app.trayMenu)
+}
 
-	go mainLoop()
-	fyneApp.Run()
-	// fyneApp.Run is blocking
+func (app *App) Run() {
+	app.setTray()
+	go app.MainLoop()
+	app.fyneApp.Run()
+}
+
+func main() {
+	globals.debug = false
+	globals.resourceIp = "10.50.0.116"
+	globals.iconBytes = iconBytes
+
+	var a = NewApp()
+	a.Run()
 }
