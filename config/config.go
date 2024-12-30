@@ -1,4 +1,6 @@
 package config
 
-var Debug = false
-var ResourceIP = "10.50.0.116"
+import "flag"
+
+var Debug = flag.Bool("dbg", false, "[-dbg]")
+var ResourceIP = flag.String("ip", "10.50.0.116", "[255.255.255.255]")
