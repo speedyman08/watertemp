@@ -1,5 +1,5 @@
 # Build
-- ```fyne package -os (darwin/windows/linux) -icon resources/thermometer.png```
+```fyne package -os (darwin/windows/linux) -icon resources/thermometer.png```
 
 using "go build ." is also possible however most operating systems will not allow for
 notifications to be sent from apps that aren't packaged, e.g. windows
