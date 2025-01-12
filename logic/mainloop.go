@@ -7,6 +7,7 @@ import (
 	"watertemp/water"
 )
 
+// MainLoop is a function which takes care of repetitive things such as querying and updating the system tray menu
 func (app *App) MainLoop() {
 	var hasFailed = false
 	var userNotifiedOnce = false
