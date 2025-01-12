@@ -1,19 +1,14 @@
-# Building this tool
-## Windows
-- ```fyne package -os windows -icon resources/thermometer.png```
-## Linux and Mac
-- ```fyne package -os linux -icon resources/thermometer.png```
-- ```fyne package -os darwin -icon resources/thermometer.png```
+# Build
+- ```fyne package -os (darwin/windows/linux) -icon resources/thermometer.png```
 
-You could just also use ```go build . ``` however there is a high change that notifications may not work because most 
-OS's will silence notifications from apps that aren't packaged properly or apps that do not have an icon
+using "go build ." is also possible however most operating systems will not allow for
+notifications to be sent from apps that aren't packaged, e.g. windows
 
 # Requirements
-- Go tooling
+- Go toolchain
 - Fyne helper tool (```go install fyne.io/fyne/v2/cmd/fyne@latest```)
-- A C Compiler (Gcc, Clang), for Fyne
-- System graphics driver
+- C Compiler (gcc, clang)
 
 # Information
-This project uses Fyne for managing the system tray which is a pretty large dependency resulting in a big build time. 
-However, it only takes a long time for the first build, subsequent builds will not take as long due to incremental recomp
+It'll take a while to build the first time due to fyne, and it's C stuff needing to be compiled.
+Will not take as long for later builds 
